@@ -1,0 +1,49 @@
+let
+    Origen = Table.Combine({#"Distancia Google E", #"Distancia Google P"}),
+
+    // Cambiar los valores de la columna PERIODO
+    #"Periodo actualizado" =
+        Table.ReplaceValue(
+            Table.ReplaceValue(
+                Table.ReplaceValue(Origen, 1, 235, Replacer.ReplaceValue, {"PERIODO"}),
+                2, 237, Replacer.ReplaceValue, {"PERIODO"}
+            ),
+            3, 239, Replacer.ReplaceValue, {"PERIODO"}
+        ),
+
+    #"Filas filtradas" = Table.SelectRows(#"Periodo actualizado", each ([Medios de Transporte] <> null)),
+    #"Otras columnas quitadas" = Table.SelectColumns(#"Filas filtradas",{"Persona", "UNIDAD", "FACULTAD", "Género", "LATITUD", "LONGITUD", "P1", "Medios de Transporte", "PERIODO", "DISTANCIA_GOOGLE_KM"}),
+
+    // Unimos con la tabla de factores
+    #"Consultas combinadas" = Table.NestedJoin(
+        #"Otras columnas quitadas",
+        {"Medios de Transporte"},
+        #"Factor Kwh",
+        {"Medios de Transporte"},
+        "Factores",
+        JoinKind.LeftOuter
+    ),
+    #"Factores expandidos" = Table.ExpandTableColumn(
+        #"Consultas combinadas",
+        "Factores",
+        {"kWh_pkm_Combustion", "kWh_pkm_Electrico"},
+        {"kWh_pkm_Combustion", "kWh_pkm_Electrico"}
+    ),
+
+    // Columnas de consumo energético
+    #"Consumo Combustion" = Table.AddColumn(
+        #"Factores expandidos",
+        "Consumo_Combustion",
+        each [DISTANCIA_GOOGLE_KM] * [kWh_pkm_Combustion]*[P1],
+        type number
+    ),
+    #"Consumo Electrico" = Table.AddColumn(
+        #"Consumo Combustion",
+        "Consumo_Electrico",
+        each [DISTANCIA_GOOGLE_KM] * [kWh_pkm_Electrico]*[P1],
+        type number
+    ),
+
+    #"Filas filtradas1" = Table.SelectRows(#"Consumo Electrico", each ([Medios de Transporte] <> "Bicicleta pública"))
+in
+    #"Filas filtradas1"

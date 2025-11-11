@@ -1,0 +1,14 @@
+let
+    Origen = Table.FromRecords({
+        [Medios_de_Transporte = "Auto_Acompañante",       kWh_pkm_Combustion = 0.315, kWh_pkm_Electrico = 0.07],
+        [Medios_de_Transporte = "Bus",               kWh_pkm_Combustion = 0.8, kWh_pkm_Electrico = 0.26],
+        [Medios_de_Transporte = "Auto_Chofer",            kWh_pkm_Combustion = 0.63, kWh_pkm_Electrico = 0.14],
+        [Medios_de_Transporte = "Motocicleta",       kWh_pkm_Combustion = 1.00, kWh_pkm_Electrico = 0.15],
+        [Medios_de_Transporte = "Scooter",           kWh_pkm_Combustion = 0.02, kWh_pkm_Electrico = 0.02],
+        [Medios_de_Transporte = "Taxi",              kWh_pkm_Combustion = 1.60, kWh_pkm_Electrico = 0.20]
+    }),
+    #"Tipo cambiado" = Table.TransformColumnTypes(Origen,{{"kWh_pkm_Combustion", type number}, {"kWh_pkm_Electrico", type number}}),
+    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Tipo cambiado",{{"Medios_de_Transporte", "Medios de Transporte"}}),
+    #"Filas ordenadas" = Table.Sort(#"Columnas con nombre cambiado",{{"Medios de Transporte", Order.Ascending}})
+in
+    #"Filas ordenadas"

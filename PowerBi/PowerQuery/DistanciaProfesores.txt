@@ -1,0 +1,67 @@
+let
+    Origen = Excel.Workbook(File.Contents("C:\Users\Christian\Desktop\TrabajoUDA\Trabajo Victor\Goolgle\REPORTE_google_con_distanciap.xlsx"), null, true),
+    Sheet1_Sheet = Origen{[Item="Sheet1",Kind="Sheet"]}[Data],
+    #"Encabezados promovidos" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),
+    #"Columnas con nombre cambiado2" = Table.RenameColumns(#"Encabezados promovidos",{{"P7", "Medios de Transporte"}}),
+    Personalizado1 = Table.TransformColumns( #"Columnas con nombre cambiado2", { {"Medios de Transporte", each List.ReplaceMatchingItems( { Number.From(_) }, { {1, "Caminando"}, {2, "Bicicleta privada"}, {3, "Bicicleta pública"}, {4, "Auto_Chofer"}, {5, "Auto_Acompañante"}, {6, "Bus"}, {7, "Tranvía"}, {8, "Taxi"}, {9, "Motocicleta"}, {10, "Scooter"} } ){0}, type text } } ),
+    #"Tipo cambiado" = Table.TransformColumnTypes(Personalizado1,{{"PERSONA", Int64.Type}, {"LATITUD", type number}, {"LONGITUD", type number}, {"DISTANCIA_GOOGLE_KM", type number}, {"DURACION_MIN", type number}}),
+    Personalizado2 = Table.TransformColumns(
+    #"Tipo cambiado",
+    {
+        {
+            "P1",
+            each List.ReplaceMatchingItems(
+                    { Number.From(_) },
+                    {
+                        {1, "1 vez"},
+                        {2, "2 veces"},
+                        {3, "Más de 2 veces"}
+                    }
+                ){0},
+            type text
+        }
+    }
+),
+    #"Valor reemplazado1" = Table.ReplaceValue(Personalizado2,"1 vez","2",Replacer.ReplaceText,{"P1"}),
+    #"Valor reemplazado" = Table.ReplaceValue(#"Valor reemplazado1","2 veces","4",Replacer.ReplaceText,{"P1"}),
+    #"Valor reemplazado2" = Table.ReplaceValue(#"Valor reemplazado","Más de 4","4",Replacer.ReplaceText,{"P1"}),
+    #"Tipo cambiado3" = Table.TransformColumnTypes(#"Valor reemplazado2",{{"P1", type number}}),
+
+    // 🔹 Merge con la tabla Factor CO2
+    CO2_Merge = Table.NestedJoin(
+        #"Tipo cambiado3",
+        {"Medios de Transporte"},
+        #"Factor CO2",
+        {"Medios de Transporte"},
+        "Factor CO2",
+        JoinKind.LeftOuter
+    ),
+    CO2_Expand = Table.ExpandTableColumn(CO2_Merge, "Factor CO2", {"Factor_CO2"}, {"Factor_CO2"}),
+    #"Tipo cambiado1" = Table.TransformColumnTypes(CO2_Expand, {{"Factor_CO2", type number}}),
+
+    #"CO2 TOTAL P" = Table.AddColumn(#"Tipo cambiado1", "CO2_TOTAL", each [DISTANCIA_GOOGLE_KM] * [Factor_CO2]*[P1]),
+    #"Tipo cambiado2" = Table.TransformColumnTypes(#"CO2 TOTAL P",{{"CO2_TOTAL", type number}}),
+    #"Filas filtradas" = Table.SelectRows(#"Tipo cambiado2", each ([Medios de Transporte] <> "Bicicleta privada" and [Medios de Transporte] <> "Caminando" and [Medios de Transporte] <> "Tranvía")),
+    #"Columnas con nombre cambiado1" = Table.RenameColumns(#"Filas filtradas",{{"PERSONA", "Persona"}}),
+    #"Otras columnas quitadas" = Table.SelectColumns(#"Columnas con nombre cambiado1",{"Persona", "UNIDAD", "GÉNERO", "LATITUD", "LONGITUD", "P1", "Medios de Transporte", "PERIODO", "DISTANCIA_GOOGLE_KM", "Factor_CO2", "CO2_TOTAL"}),
+    Personalizado3 = Table.TransformColumns(
+    #"Otras columnas quitadas",
+    {
+        {
+            "GÉNERO",
+            each
+                let v = try Number.From(_) otherwise null in
+                if v = 2 then "MASCULINO"
+                else if v = 3 then "FEMENINO"
+                else if v = 4 then "Otros"
+                else Text.From(_),
+            type text
+        }
+    }
+),
+    #"Columnas con nombre cambiado" = Table.RenameColumns(Personalizado3,{{"GÉNERO", "Género"}}),
+    #"Tipo cambiado4" = Table.TransformColumnTypes(#"Columnas con nombre cambiado",{{"UNIDAD", type text}}),
+    #"Valor reemplazado3" = Table.ReplaceValue(#"Tipo cambiado4","1","Administrativos",Replacer.ReplaceText,{"UNIDAD"}),
+    #"Valor reemplazado4" = Table.ReplaceValue(#"Valor reemplazado3","2","Docentes",Replacer.ReplaceText,{"UNIDAD"})
+in
+    #"Valor reemplazado4"

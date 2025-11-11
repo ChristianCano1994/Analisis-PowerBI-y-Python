@@ -1,0 +1,16 @@
+Consumo_Combus_Ajustado = 
+SUMX (
+    KWH,
+    KWH[Consumo_Combustion] * (1 - 
+        SWITCH(
+            TRUE(),
+            KWH[Medios de Transporte] = "Auto_Acompañante", [Valor de ACOMPAÑANTE KWH],
+            KWH[Medios de Transporte] = "Bus", [Valor de BUS KWH],
+            KWH[Medios de Transporte] = "Auto_Chofer", [Valor de CHOFER KWH],
+            KWH[Medios de Transporte] = "Motocicleta", [Valor de MOTOCICLETA KWH],
+            KWH[Medios de Transporte] = "Scooter", [Valor de SCOOTER KWH],
+            KWH[Medios de Transporte] = "Taxi", [Valor de TAXI KWH],
+            0
+        )
+    )
+)

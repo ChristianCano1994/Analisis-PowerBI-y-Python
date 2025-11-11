@@ -1,0 +1,14 @@
+CO2 Ajustado =
+SUMX(
+    'CO2',
+    SWITCH(
+        TRUE(),
+        'CO2'[Medios de Transporte] = "Auto_Chofer",        'CO2'[CO2_TOTAL] * (1 - 'CHOFER'[Valor de CHOFER]),
+        'CO2'[Medios de Transporte] = "Auto_Acompañante",   'CO2'[CO2_TOTAL] * (1 - 'ACOMPAÑANTE'[Valor de ACOMPAÑANTE]),
+        'CO2'[Medios de Transporte] = "Motocicleta",        'CO2'[CO2_TOTAL] * (1 - 'MOTOCICLETA'[Valor de MOTOCICLETA]),
+        'CO2'[Medios de Transporte] = "Scooter",            'CO2'[CO2_TOTAL] * (1 - 'SCOOTER'[Valor de SCOOTER]),
+        'CO2'[Medios de Transporte] = "Taxi",               'CO2'[CO2_TOTAL] * (1 - 'TAXI'[Valor de TAXI]),
+        'CO2'[Medios de Transporte] = "Bus",                'CO2'[CO2_TOTAL] * (1 - 'BUS'[Valor de BUS]),
+        0
+    )
+)

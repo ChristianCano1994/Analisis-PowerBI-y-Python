@@ -1,0 +1,15 @@
+let
+    Source = Table.FromRecords({
+        [Medios de Transporte = "Auto_Chofer",       Factor_CO2 = 220],
+        [Medios de Transporte = "Auto_Acompañante",  Factor_CO2 = 110],
+        [Medios de Transporte = "Motocicleta",  Factor_CO2 = 167],
+        [Medios de Transporte = "Scooter",      Factor_CO2 = 2.76],
+        [Medios de Transporte = "Taxi",         Factor_CO2 = 273.05],
+        [Medios de Transporte = "Bus",          Factor_CO2 = 224]
+    }),
+    #"Tipo cambiado" = Table.TransformColumnTypes(
+        Source,
+        {{"Medios de Transporte", type text}, {"Factor_CO2", type number}}
+    )
+in
+    #"Tipo cambiado"

@@ -1,0 +1,13 @@
+let
+    CO2 = Table.Combine({#"Distancia Google E", #"Distancia Google P"}),
+
+    #"Periodo actualizado" = 
+        Table.ReplaceValue(
+            Table.ReplaceValue(
+                Table.ReplaceValue(CO2, 1, 235, Replacer.ReplaceValue, {"PERIODO"}),
+                2, 237, Replacer.ReplaceValue, {"PERIODO"}
+            ),
+            3, 239, Replacer.ReplaceValue, {"PERIODO"}
+        )
+in
+    #"Periodo actualizado"

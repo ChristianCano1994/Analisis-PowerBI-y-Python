@@ -1,0 +1,13 @@
+let
+    // === Selección de columnas base ===
+    E = Table.SelectColumns(#"reporte_codificado E",{"Persona", "Periodo", "Unidad","Facultad","Género", "P1", "P5", "Medios de Transporte", "P8", "P10", "P11", "P18"}),
+    P = Table.SelectColumns(#"reporte_codificado P", {"Persona", "Unidad", "Género", "Medios de Transporte", "P18", "P1", "P5", "P8", "P10", "P11","Periodo"}),
+    // === Unir tablas base ===
+    Unida = Table.Combine({E, P, #"reporte_codificado E", #"reporte_codificado P"}),
+    #"Tipo cambiado" = Table.TransformColumnTypes(Unida,{{"Unidad", type text}}),
+    #"Valor reemplazado" = Table.ReplaceValue(#"Tipo cambiado","3","Estudiantes",Replacer.ReplaceText,{"Unidad"}),
+    #"Valor reemplazado1" = Table.ReplaceValue(#"Valor reemplazado","2","Docentes",Replacer.ReplaceText,{"Unidad"}),
+    #"Valor reemplazado2" = Table.ReplaceValue(#"Valor reemplazado1","1","Administrativos",Replacer.ReplaceText,{"Unidad"}),
+    #"Tipo cambiado1" = Table.TransformColumnTypes(#"Valor reemplazado2",{{"Periodo", Int64.Type}})
+in
+    #"Tipo cambiado1"

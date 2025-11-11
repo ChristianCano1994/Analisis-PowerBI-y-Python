@@ -1,0 +1,251 @@
+let
+    Origen = Csv.Document(File.Contents("C:\Users\Christian\Desktop\TrabajoUDA\Trabajo Victor\data\Profesores_Unificado.csv"),[Delimiter=";", Columns=49, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+    #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+    #"Tipo cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos",{{"Persona", Int64.Type}, {"Unidad", Int64.Type}, {"Género", Int64.Type}, {"Edad", Int64.Type}, {"Etnia", Int64.Type}, {"Discapacidad", Int64.Type}, {"Tipo discapacidad", Int64.Type}, {"Latitud", Int64.Type}, {"Longitud", Int64.Type}, {"P1", Int64.Type}, {"P2.1", Int64.Type}, {"P2.2", Int64.Type}, {"P2.3", Int64.Type}, {"P2.4", Int64.Type}, {"P2.5", Int64.Type}, {"P2.6", Int64.Type}, {"P2.7", Int64.Type}, {"P2.8", Int64.Type}, {"P3", Int64.Type}, {"P4", Int64.Type}, {"P5", Int64.Type}, {"P6", Int64.Type}, {"P7", Int64.Type}, {"P8", Int64.Type}, {"P9", Int64.Type}, {"P10", Int64.Type}, {"P11", Int64.Type}, {"P12", Int64.Type}, {"P13", Int64.Type}, {"P14", Int64.Type}, {"P15", Int64.Type}, {"P16.1", Int64.Type}, {"P16.2", Int64.Type}, {"P16.3", Int64.Type}, {"P16.4", Int64.Type}, {"P16.5", Int64.Type}, {"P16.6", Int64.Type}, {"P16.7", Int64.Type}, {"P16.8", Int64.Type}, {"P16.9", Int64.Type}, {"P16.10", Int64.Type}, {"P16.11", Int64.Type}, {"P16.12", Int64.Type}, {"P17", Int64.Type}, {"P18", Int64.Type}, {"P19", Int64.Type}, {"P20", Int64.Type}, {"P21", Int64.Type}}),
+    Personalizado1 = Table.RenameColumns(#"Tipo cambiado",{{"P7", "Medios de Transporte"}}),
+    Personalizado2 = Table.TransformColumns(
+    #"Personalizado1",
+    {
+        {
+            "P1",
+            each List.ReplaceMatchingItems(
+                    { Number.From(_) },
+                    {
+                        {1, "1 vez"},
+                        {2, "2 veces"},
+                        {3, "Más de 2 veces"}
+                    }
+                ){0},
+            type text
+        }
+    }
+),
+    Personalizado3 = Table.TransformColumns(
+    #"Personalizado2",
+    {
+        {
+            "P3",
+            each
+                let v = try Number.From(_) otherwise null in
+                if v = 1 then "Entre 09:00 - 11:00"
+                else if v = 2 then "Entre 11:00 - 13:00"
+                else if v = 3 then "Entre 13:00 - 15:00"
+                else if v = 4 then "Entre 15:00 - 17:00"
+                else if v = 5 then "Entre 17:00 - 19:00"
+                else if v = 6 then "Entre 19:00 - 21:00"
+                else if v = 7 then "Pasado las 21:00"
+                else Text.From(_),
+            type text
+        }
+    }
+),
+    Personalizado4 = Table.TransformColumns(
+    #"Personalizado3",
+    {
+        {"P4",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Menos de 1 kilómetro de distancia"},
+                    {2,"Entre 1 - 2 kilómetros de distancia"},
+                    {3,"Entre 2 - 3 kilómetros de distancia"},
+                    {4,"Entre 3 - 4 kilómetros de distancia"},
+                    {5,"Entre 4 - 5 kilómetros de distancia"},
+                    {6,"Más de 5 kilómetros de distancia"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado5 = Table.TransformColumns(
+    #"Personalizado4",
+    {
+        {"P5",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Entre 5 - 10 min"},
+                    {2,"Entre 10 - 20 min"},
+                    {3,"Entre 20 - 30 min"},
+                    {4,"Entre 30 - 40 min"},
+                    {5,"Entre 40 - 50 min"},
+                    {6,"Entre 50 - 60 min"},
+                    {7,"Más de 60 min"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado6 = Table.TransformColumns(
+    #"Personalizado5",
+    {
+        {"P8",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Salud"},
+                    {2,"Distancia"},
+                    {3,"Rapidez"},
+                    {4,"Comodidad"},
+                    {5,"Seguridad"},
+                    {6,"Ahorrar dinero"},
+                    {7,"Cuidado del ambiente"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado7 = Table.TransformColumns(
+    #"Personalizado6",
+    {
+        {"P6",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Entre 5 - 10 min"},
+                    {2,"Entre 10 - 20 min"},
+                    {3,"Entre 20 - 30 min"},
+                    {4,"Entre 30 - 40 min"},
+                    {5,"Entre 40 - 50 min"},
+                    {6,"Entre 50 - 60 min"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado8 = Table.TransformColumns(
+    #"Personalizado7",
+    {
+        {"P9",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Si"},
+                    {2,"No"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado9 = Table.TransformColumns(
+    #"Personalizado8",
+    {
+        {"P10",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Auto_Acompañante"},
+                    {2,"Auto_Chofer"},
+                    {3,"Bicicleta privada"},
+                    {4,"Bicicleta pública"},
+                    {5,"Bus"},
+                    {6,"Caminando"},
+                    {7,"Motocicleta"},
+                    {8,"Scooter"},
+                    {9,"Taxi"},
+                    {10,"Tranvía"},
+                    {11,"Otro"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado10 = Table.TransformColumns(
+    #"Personalizado9",
+    {
+        {"P11",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Ahorrar dinero"},
+                    {2,"Comodidad"},
+                    {3,"Cuidado del ambiente"},
+                    {4,"Distancia"},
+                    {5,"Rapidez"},
+                    {6,"Salud"},
+                    {7,"Seguridad"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado11 = Table.TransformColumns(
+    #"Personalizado10",
+    {
+        {"P12",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"SI"},
+                    {2,"NO"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado12 = Table.TransformColumns( #"Personalizado11", { {"Medios de Transporte", each List.ReplaceMatchingItems( { Number.From(_) }, { {1, "Caminando"}, {2, "Bicicleta privada"}, {3, "Bicicleta pública"}, {4, "Auto_Chofer"}, {5, "Auto_Acompañante"}, {6, "Bus"}, {7, "Tranvía"}, {8, "Taxi"}, {9, "Motocicleta"}, {10, "Scooter"} } ){0}, type text } } ),
+    Personalizado13 = Table.TransformColumns(
+    #"Personalizado12",
+    {
+        {"P13",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Si"},
+                    {2,"No"}
+                }
+            ){0},
+         type text}
+    }
+),
+    #"Filas filtradas" = Table.SelectRows(Personalizado13, each true),
+    Personalizado15 = Table.TransformColumns(
+    #"Filas filtradas",
+    {
+        {"P18",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"Un bus"},
+                    {2,"Dos buses"},
+                    {3,"Más de dos buses"}
+                }
+            ){0},
+         type text}
+    }
+),
+    Personalizado14 = Table.TransformColumns(
+    #"Personalizado15",
+    {
+        {
+            "Género",
+            each
+                let v = try Number.From(_) otherwise null in
+                if v = 2 then "MASCULINO"
+                else if v = 3 then "FEMENINO"
+                else if v = 4 then "Otros"
+                else Text.From(_),       // conserva el valor original si no es 2/3/4
+            type text
+        }
+    }
+),
+    #"Columnas reordenadas" = Table.ReorderColumns(Personalizado14,{"Persona", "Periodo", "Unidad", "Género", "Edad", "Etnia", "Discapacidad", "Tipo discapacidad", "Latitud", "Longitud", "P1", "P2.1", "P2.2", "P2.3", "P2.4", "P2.5", "P2.6", "P2.7", "P2.8", "P3", "P4", "P5", "P6", "Medios de Transporte", "P8", "P9", "P10", "P11", "P12", "P13", "P14", "P15", "P16.1", "P16.2", "P16.3", "P16.4", "P16.5", "P16.6", "P16.7", "P16.8", "P16.9", "P16.10", "P16.11", "P16.12", "P17", "P18", "P19", "P20", "P21"}),
+    #"Tipo cambiado1" = Table.TransformColumnTypes(#"Columnas reordenadas",{{"Periodo", type number}}),
+    Personalizado16 = Table.TransformColumns(
+    #"Tipo cambiado1",
+    {
+        {"Periodo",
+         each List.ReplaceMatchingItems(
+                { Number.From(_) },
+                {
+                    {1,"235"},
+                    {2,"237"},
+                    {3,"239"}
+                }
+            ){0},
+         type text}
+    }
+),
+    #"Filas filtradas1" = Table.SelectRows(Personalizado16, each [Medios de Transporte] <> null and [Medios de Transporte] <> "")
+in
+    #"Filas filtradas1"
